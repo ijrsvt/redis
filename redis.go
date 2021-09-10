@@ -187,6 +187,9 @@ func (redis *Redis) AXFR(z *Zone) (records []dns.RR) {
 		if key == "@" {
 			location := redis.findLocation(z.Name, z)
 			record := redis.get(location, z)
+			if record == nil {
+				return nil
+			}
 			soa, _ = redis.SOA(z.Name, z, record)
 		} else {
 			fqdnKey := dns.Fqdn(key) + z.Name
@@ -195,6 +198,9 @@ func (redis *Redis) AXFR(z *Zone) (records []dns.RR) {
 
 			location := redis.findLocation(fqdnKey, z)
 			record := redis.get(location, z)
+			if record == nil {
+				return nil
+			}
 
 			// Pull all zone records
 			as, xs = redis.A(fqdnKey, z, record)
@@ -242,6 +248,9 @@ func (redis *Redis) hosts(name string, z *Zone) []dns.RR {
 		return nil
 	}
 	record = redis.get(location, z)
+	if record == nil {
+		return nil
+	}
 	a, _ := redis.A(name, z, record)
 	answers = append(answers, a...)
 	aaaa, _ := redis.AAAA(name, z, record)
